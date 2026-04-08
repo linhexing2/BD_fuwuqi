@@ -1,0 +1,25 @@
+{
+  "entities": {
+    "MinecraftServer": {
+      "title": "Minecraft Server",
+      "description": "Information about a shared Minecraft server instance.",
+      "type": "object",
+      "properties": {
+        "ownerId": { "type": "string", "description": "UID of the user sharing the server" },
+        "ownerName": { "type": "string", "description": "Display name of the owner" },
+        "ip": { "type": "string", "description": "Public IP or tunnel address" },
+        "port": { "type": "number", "description": "Connection port" },
+        "status": { "type": "string", "enum": ["online", "offline"], "description": "Current status" },
+        "lastSeen": { "type": "string", "format": "date-time", "description": "Last heartbeat timestamp" },
+        "description": { "type": "string", "description": "Optional server description" }
+      },
+      "required": ["ownerId", "ip", "port", "status", "lastSeen"]
+    }
+  },
+  "firestore": {
+    "/servers/{serverId}": {
+      "schema": "MinecraftServer",
+      "description": "Global list of active Minecraft servers"
+    }
+  }
+}
