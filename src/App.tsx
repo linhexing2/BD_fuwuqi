@@ -86,9 +86,12 @@ export default function App() {
     // 例如: const BACKEND_URL = "https://your-backend-on-railway.app";
     const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
       ? undefined 
-      : (window.location.hostname.includes('github.io') ? "https://ais-dev-xsocdzfxkufrehubopp4ym-173678842048.us-east5.run.app" : undefined);
+      : (window.location.hostname.includes('github.io') ? "https://ais-pre-xsocdzfxkufrehubopp4ym-173678842048.us-east5.run.app" : undefined);
 
-    const newSocket = io(BACKEND_URL);
+    const newSocket = io(BACKEND_URL, {
+      transports: ['websocket'],
+      withCredentials: true
+    });
     setSocket(newSocket);
 
     newSocket.on("server-list", (list: MCServer[]) => {

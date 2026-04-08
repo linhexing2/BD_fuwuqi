@@ -13,7 +13,9 @@ async function startServer() {
   const httpServer = createServer(app);
   const io = new Server(httpServer, {
     cors: {
-      origin: "*",
+      origin: ["https://linhexing2.github.io", "http://localhost:3000"],
+      methods: ["GET", "POST"],
+      credentials: true
     },
   });
 
