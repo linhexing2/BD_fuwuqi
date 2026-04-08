@@ -136,13 +136,21 @@ export default function App() {
 
   const handleManualBroadcast = () => {
     if (socket && manualPort) {
+      const portNum = parseInt(manualPort);
+      // 同步更新本地状态显示
+      setLocalServer({ detected: true, port: portNum });
+      
       socket.emit("broadcast-server", {
         ownerName: userName,
         ip: manualIp,
-        port: parseInt(manualPort),
+        port: portNum,
         status: 'online',
         description: "手动配置的服务器"
       });
+
+      // 滚动到列表查看
+      const serverList = document.getElementById('server-list');
+      serverList?.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -311,7 +319,7 @@ export default function App() {
       </section>
 
       {/* Global Servers List */}
-      <section className="py-20 px-6 bg-white">
+      <section id="server-list" className="py-20 px-6 bg-white">
         <div className="max-w-6xl mx-auto">
           <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
             <div>
