@@ -111,23 +111,34 @@ export default function App() {
 
     for (const port of commonPorts) {
       try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 1500);
-        
-        // 尝试通过 fetch 探测，捕获任何形式的响应（即使是协议错误也代表端口开放）
-        await fetch(`http://127.0.0.1:${port}`, { 
-          mode: 'no-cors',
-          signal: controller.signal,
-          cache: 'no-cache'
+        // 尝试使用图片探测法，这在某些浏览器中比 fetch 更容易穿透安全限制
+        const probeResult = await new Promise((resolve) => {
+          const img = new Image();
+          const timer = setTimeout(() => {
+            img.src = "";
+            resolve(false);
+          }, 1000);
+          
+          img.onload = () => { clearTimeout(timer); resolve(true); };
+          img.onerror = () => { clearTimeout(timer); resolve(true); }; // 报错也说明端口有响应
+          img.src = `http://127.0.0.1:${port}/favicon.ico?t=${Date.now()}`;
         });
-        
+
+        if (probeResult) {
+          setLocalServer({ detected: true, port });
+          found = true;
+          break;
+        }
+
+        // 备用 fetch 探测
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 1000);
+        await fetch(`http://127.0.0.1:${port}`, { mode: 'no-cors', signal: controller.signal });
         clearTimeout(timeoutId);
         setLocalServer({ detected: true, port });
         found = true;
         break;
       } catch (e: any) {
-        // 在某些浏览器中，如果端口开放但协议不匹配，会抛出 TypeError
-        // 如果是 AbortError 则代表超时（端口可能关闭或被防火墙拦截）
         if (e.name === 'TypeError') {
            setLocalServer({ detected: true, port });
            found = true;
@@ -313,7 +324,12 @@ export default function App() {
 
               <div className="mt-4 p-3 bg-amber-500/5 rounded-xl border border-amber-500/10">
                 <p className="text-[10px] text-amber-600 leading-relaxed">
-                  提示：由于浏览器安全限制，若您使用 HTTPS 访问，自动探测可能会被拦截。建议手动输入您的内网穿透公网地址。
+                  <span className="font-bold">为什么检测不到？</span><br />
+                  由于您正在通过 HTTPS 访问，浏览器默认禁止网页连接您的本地电脑。
+                  <br /><br />
+                  <span className="font-bold">解决方法：</span><br />
+                  1. 直接在上方输入您的 <span className="underline">内网穿透公网地址</span>。<br />
+                  2. 或者在 Chrome 浏览器地址栏输入 <code className="bg-amber-100 px-1">chrome://flags/#block-insecure-private-network-requests</code> 并设置为 <span className="font-bold">Disabled</span>。
                 </p>
               </div>
             </div>
