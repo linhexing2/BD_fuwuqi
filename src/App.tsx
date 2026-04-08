@@ -82,7 +82,13 @@ export default function App() {
 
   // Socket initialization
   useEffect(() => {
-    const newSocket = io();
+    // 如果在 GitHub Pages 部署，需要指向一个运行中的后端服务器地址
+    // 例如: const BACKEND_URL = "https://your-backend-on-railway.app";
+    const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+      ? undefined 
+      : (window.location.hostname.includes('github.io') ? "https://ais-dev-xsocdzfxkufrehubopp4ym-173678842048.us-east5.run.app" : undefined);
+
+    const newSocket = io(BACKEND_URL);
     setSocket(newSocket);
 
     newSocket.on("server-list", (list: MCServer[]) => {
